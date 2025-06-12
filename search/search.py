@@ -62,7 +62,7 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
-def tinyMazeSearch(problem):
+def tinyMazeSearch(problem) -> list[str]:
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
     sequence of moves will be incorrect, so only use this for tinyMaze.
@@ -72,7 +72,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def depthFirstSearch(problem):
+def depthFirstSearch(problem) -> list[str]:
     """
     Search the deepest nodes in the search tree first.
 
@@ -110,7 +110,7 @@ def depthFirstSearch(problem):
     return []
     #util.raiseNotDefined()
 
-def breadthFirstSearch(problem):
+def breadthFirstSearch(problem) -> list[str]:
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
 
@@ -136,7 +136,7 @@ def breadthFirstSearch(problem):
     return []
     #util.raiseNotDefined()
 
-def uniformCostSearch(problem):
+def uniformCostSearch(problem) -> list[str]:
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
 
@@ -171,7 +171,7 @@ def nullHeuristic(state, problem=None):
     
     return 0
 
-def aStarSearch(problem, heuristic=nullHeuristic):
+def aStarSearch(problem, heuristic=nullHeuristic) -> list[str]:
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     queue = util.PriorityQueue()    

@@ -371,7 +371,39 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    """
+    My solution: 
+    Checks if there are any remaining corners to visit.
+    If there are none, then it returns 0, because we've visited all corners.
+    If there is one remaining corner, the heuristic is the distance to the closest corner.
+    If there are multiple remaining corners, the heuristic is the distance to the closest 
+    corner plus the maximum distance between any two remaining corners.
+    We use the maximum distance because using the minimum would severely underestimate the
+    distance to ALL remaining corners.
+    """
+    position, visitedCorners = state
+
+    remainingCorners = [i for i in range(len(visitedCorners)) if visitedCorners[i] == 0]
+    
+    if not remainingCorners:
+        return 0
+    
+    closestCorner = min(abs(position[0] - corners[corner][0]) + abs(position[1] - corners[corner][1])
+                        for corner in remainingCorners)
+    
+    if len(remainingCorners) > 1:
+        remainingCornerPositions = [corners[i] for i in remainingCorners]
+        maxDistance = 0
+        
+        for i in range(len(remainingCornerPositions)):
+            for j in range(i+1, len(remainingCornerPositions)):
+                distance = abs(remainingCornerPositions[i][0] - remainingCornerPositions[j][0]) + \
+                        abs(remainingCornerPositions[i][1] - remainingCornerPositions[j][1])
+                maxDistance = max(maxDistance, distance)
+        
+        return closestCorner + maxDistance
+    else:
+        return closestCorner
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"

@@ -13,7 +13,7 @@
 
 
 from util import manhattanDistance
-from game import Directions
+from game import Directions, Actions
 import random, util
 
 from game import Agent
@@ -74,7 +74,56 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        score = successorGameState.getScore()
+        foodList = newFood.asList()
+        currentFoodList = currentGameState.getFood().asList()
+        
+        if foodList:
+            closestFoodDistance = min(manhattanDistance(newPos, food) for food in foodList)
+            score += 20.0 / (closestFoodDistance + 1)
+        
+        if len(foodList) < len(currentFoodList):
+            score += 200
+            
+        if len(successorGameState.getCapsules()) < len(currentGameState.getCapsules()):
+            score += 300
+        
+        minGhostDistance = float('inf')
+        for i, ghostState in enumerate(newGhostStates):
+            ghostPos = ghostState.getPosition()
+            ghostDistance = manhattanDistance(newPos, ghostPos)
+            minGhostDistance = min(minGhostDistance, ghostDistance)
+            
+            if newScaredTimes[i] > 0:
+                score += 150.0 / (ghostDistance + 1)
+            else: 
+                if ghostDistance <= 1:
+                    score -= 500 
+                elif ghostDistance == 2:
+                    score -= 50 
+        
+        if minGhostDistance >= 3:
+            if foodList:
+                closestFoodDistance = min(manhattanDistance(newPos, food) for food in foodList)
+                score += 30.0 / (closestFoodDistance + 1) 
+        
+        currentPos = currentGameState.getPacmanPosition()
+        if action != Directions.STOP:
+            actions = currentGameState.getLegalActions()
+            if len(actions) > 2:
+                actionVector = Actions.directionToVector(action)
+                newPosFromAction = (currentPos[0] + actionVector[0], currentPos[1] + actionVector[1])
+                if newPosFromAction != newPos:
+                    pass
+                else:
+                    score -= 5
+        
+        if action == Directions.STOP and minGhostDistance > 2:
+            score -= 100
+        elif action == Directions.STOP:
+            score -= 10 
+            
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -129,7 +178,45 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def minimax(state, depth, agentIndex):
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+
+            legalActions = state.getLegalActions(agentIndex)
+
+            if not legalActions:
+                return self.evaluationFunction(state)
+
+            nextAgent = (agentIndex + 1) % state.getNumAgents()
+            nextDepth = depth - 1 if nextAgent == 0 else depth
+
+            if agentIndex == 0:
+                maxEval = float('-inf')
+                for action in legalActions:
+                    successor = state.generateSuccessor(agentIndex, action)
+                    eval_score = minimax(successor, nextDepth, nextAgent)
+                    maxEval = max(maxEval, eval_score)
+                return maxEval
+            else:
+                minEval = float('inf')
+                for action in legalActions:
+                    successor = state.generateSuccessor(agentIndex, action)
+                    eval_score = minimax(successor, nextDepth, nextAgent)
+                    minEval = min(minEval, eval_score)
+                return minEval
+
+        legalActions = gameState.getLegalActions(0)
+        bestAction = None
+        bestScore = float('-inf')
+
+        for action in legalActions:
+            successor = gameState.generateSuccessor(0, action)
+            score = minimax(successor, self.depth, 1)
+            if score > bestScore:
+                bestScore = score
+                bestAction = action
+        
+        return bestAction
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
